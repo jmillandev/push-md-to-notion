@@ -43541,12 +43541,20 @@ var NotionApi = class {
    * Convert markdown to the notion block data format and append it to an existing block.
    * @param blockId Block which the markdown elements will be appended to.
    * @param md Markdown as string.
+   * @param preamble Optional array of blocks to prepend to the markdown blocks.
    */
   async appendMarkdown(blockId, md, preamble = []) {
-    await this.client.blocks.children.append({
-      block_id: blockId,
-      children: [...preamble, ...(0, import_martian.markdownToBlocks)(md)]
-    });
+    let blocks = [...preamble, ...(0, import_martian.markdownToBlocks)(md)];
+    const NOTION_BLOCK_LIMIT = 100;
+    while (blocks.length > 0) {
+      const blockSlice = blocks.slice(0, NOTION_BLOCK_LIMIT);
+      blocks = blocks.slice(NOTION_BLOCK_LIMIT);
+      console.log(`Appending ${blockSlice.length} blocks to ${blockId}`);
+      await this.client.blocks.children.append({
+        block_id: blockId,
+        children: blockSlice
+      });
+    }
   }
   /**
    * Iterate over all of the childeren of a given block. This manages the underlying paginated API.

@@ -42,16 +42,25 @@ export class NotionApi {
    * Convert markdown to the notion block data format and append it to an existing block.
    * @param blockId Block which the markdown elements will be appended to.
    * @param md Markdown as string.
+   * @param preamble Optional array of blocks to prepend to the markdown blocks.
    */
   public async appendMarkdown(
     blockId: string,
     md: string,
     preamble: BlockObjectRequest[] = []
   ) {
-    await this.client.blocks.children.append({
-      block_id: blockId,
-      children: [...preamble, ...markdownToBlocks(md)],
-    });
+    let blocks = [...preamble, ...markdownToBlocks(md)];
+    // Notion API has a limit of 100 blocks per request
+    const NOTION_BLOCK_LIMIT = 100;
+    while (blocks.length > 0) {
+      const blockSlice = blocks.slice(0, NOTION_BLOCK_LIMIT);
+      blocks = blocks.slice(NOTION_BLOCK_LIMIT);
+      console.log(`Appending ${blockSlice.length} blocks to ${blockId}`);
+      await this.client.blocks.children.append({
+        block_id: blockId,
+        children: blockSlice,
+      });
+    }
   }
 
   /**
