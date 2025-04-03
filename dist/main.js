@@ -43585,7 +43585,7 @@ var import_node_child_process = require("node:child_process");
 var core = __toESM(require_core());
 function getChangedMdFiles() {
   core.startGroup("get changed markdown files");
-  const gitCommand = "git show --name-only --pretty=format:";
+  const gitCommand = "git diff --name-only HEAD^ HEAD";
   const gitOutput = (0, import_node_child_process.execSync)(gitCommand, {
     encoding: "utf-8"
   });

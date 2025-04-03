@@ -7,7 +7,7 @@ import * as core from '@actions/core';
  */
 export function getChangedMdFiles(): string[] {
   core.startGroup('get changed markdown files');
-  const gitCommand = 'git show --name-only --pretty=format:';
+  const gitCommand = 'git diff --name-only HEAD^ HEAD';
   const gitOutput = execSync(gitCommand, {
     encoding: 'utf-8',
   });
